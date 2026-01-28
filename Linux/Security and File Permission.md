@@ -52,6 +52,9 @@ grep -i <username> /etc/passwd
 2. **Super User Account**:
    - It is **root** account, with UID = 0.
    - It has unrestricted access and control over the system.
+   - We can elimante the need ever loggin in as a root user, by assigning `nologin` shell to root user.
+   - <img width="522" height="96" alt="image" src="https://github.com/user-attachments/assets/6b5f2346-5f52-4232-a801-931539c2c8fb" />  
+
 3. **System Accounts**:
    - Created during the OS installation, for use by software and services that will not run by super user.
    - UID range: <100, or 500 to 1000.
@@ -60,6 +63,55 @@ grep -i <username> /etc/passwd
 4. **Service Accounts**:
    - Created when services are installed in linux.
    - For **example**, an **nginx service** makes use of a service account called **nginx**.
+     <img width="1102" height="513" alt="image" src="https://github.com/user-attachments/assets/a680aae3-f25d-4b2a-b1e7-700cc0e744e7" />
+
+> ### COMMANDS
+- To see the information about user. This command give information like UID, GID.
+  ```
+  id
+  ```
+- To list of the users cuurently logged into the system.
+  ```
+  who
+  ```
+- To get record of all loggedin users. also shows date and tie when system is rebooted.
+  ```
+  last
+  ```
+  <img width="1133" height="387" alt="image" src="https://github.com/user-attachments/assets/e2fa554d-7be7-4821-ad70-daa670582139" />
+
+> ### Switching Users
+To swith to any user type command ` su - ` and enter password.
+```
+su -
+```
+This can also be used as
+```
+su -c "whoami"
+```
+This command requires password of the user you are switching to.
+Intead we can use SUDO.
+#### SUDO
+Sudo makes us use the previlege of root user. So we can intall and run commands with previlege access.  
+ex:  
+```
+sudo apt-get install nginix
+```
+- We need sudo password for that usser.
+- The default configuration is defined under `/etc/sudoers` file.  
+- File defines policies applied by `sudo` command.  
+- File can be changed by using  
+```
+visudo
+```
+- Only users mentioned in the `/etc/sudoers` file can make use of `sudo` command for previleged access.
+- Admins can manage which user can do what.
+- Example below you can see, **bob** has complete admin previleges, but **sara** can only reboot the system.
+- <img width="1421" height="713" alt="image" src="https://github.com/user-attachments/assets/9657d75d-6bb1-455e-978f-f6d33403f560" />
+  
+
+
+
 
 
 
