@@ -33,16 +33,24 @@ Every user account contains details like
 - **Default shell**. With which user can log in and use. Ex: `/bin/sh`.
  
 We can get these details by below command
-```
-id <username>
-```
-<img width="922" height="96" alt="image" src="https://github.com/user-attachments/assets/c6c9d926-f495-4adb-978f-05cfb05bb020" />
+- Shows the UID (user ID), GID (group ID), and group memberships for Bob. It confirms he's a user account and his group info.
+  ```
+  id <username>
+  ```
+  <img width="922" height="96" alt="image" src="https://github.com/user-attachments/assets/c6c9d926-f495-4adb-978f-05cfb05bb020" />
+- To retrieves the full entry from the system's user database, showing details like username, UID, GID, home directory, and default shell.
+  ```
+  getent passwd <user_name>
+  ```
+  ```
+  getent passwd bob
+  ``` 
 
-To check Home directory path and default shell:
-```
-grep -i <username> /etc/passwd
-```
-<img width="898" height="76" alt="image" src="https://github.com/user-attachments/assets/ea8183a6-23c5-4f1f-bd17-e83d11e03fd9" />
+- To check Home directory path and default shell:
+  ```
+  grep -i <username> /etc/passwd
+  ```
+  <img width="898" height="76" alt="image" src="https://github.com/user-attachments/assets/ea8183a6-23c5-4f1f-bd17-e83d11e03fd9" />
 
 > ### Account Types
 
@@ -107,11 +115,175 @@ visudo
 - Only users mentioned in the `/etc/sudoers` file can make use of `sudo` command for previleged access.
 - Admins can manage which user can do what.
 - Example below you can see, **bob** has complete admin previleges, but **sara** can only reboot the system.
-- <img width="1421" height="713" alt="image" src="https://github.com/user-attachments/assets/9657d75d-6bb1-455e-978f-f6d33403f560" />
-  
+  <img width="1421" height="713" alt="image" src="https://github.com/user-attachments/assets/9657d75d-6bb1-455e-978f-f6d33403f560" />
+#### sudoers file
+- Lines begin with **#** are comments
+- Actual lines in the sudoers file whih grant access are like this
+  ```
+  root   ALL=(ALL:ALL)  ALL
+  %admin  ALL=(ALL)  ALL
+  %sudo  ALL=(ALL:ALL)  ALL
+  bob  ALL=(ALL:ALL)  ALL
+  sarah  localhost=/usr/bin/shutdown -r  now
+  ```
+- **First Field** : is either user or group. Groups begin with **%** symbol.
+- **Second Field**: By default it is **ALL**. It specifies the host in whih user has access. In a normal setup there will be only one host which is **localhost**. So the value **ALL** also implies **localhost**.
+- **Third Field**: Enclosed in the brackets with two parts. Specifies what user can act as. First part - can user run as what user, second part - can user run as what gorup. All means any user and group. If not specified then by default it is root user.
+- **Field 4**: The Command Specification
+  This field controls **what** the user can actually do once they have assumed their new identity.
+  * **Standard Admin:** `ALL` — Allows every command on the system.
+  * **Restricted Access:** `/usr/bin/apt-get` — Allows ONLY the update tool.
+  * **Strict Arguments:** `/usr/sbin/service apache2 restart` — The user can restart the webserver, but they cannot *stop* it because only `restart` was authorized.
+  **Note:** Always use absolute paths (e.g., `/usr/bin/ls` instead of just `ls`) to prevent users from running malicious spoofed versions of commands.
+#### Field 3: The Identity Mask (RunAs User : RunAs Group)
+
+The third field is enclosed in parentheses and defines **who** the user is allowed to act as. It effectively masks the current user's identity with another user or group's permissions.
+
+##### 1. Internal Structure
+The field is split into two parts by a colon: `(User : Group)`
+* **Left of colon:** Specifies the users that can be impersonated.
+* **Right of colon:** Specifies the groups that can be assumed.
+
+| Entry | Resulting Permission |
+| :--- | :--- |
+| **(ALL:ALL)** | User can run commands as **any user** and as **any group**. |
+| **(ALL)** | User can run commands as **any user**, but only with that user's default group. |
+| **(root)** | User is restricted to impersonating **only the root user**. |
+| **(:developers)** | User stays as themselves but gains the permissions of the **developers group**. |
+
+---
+
+##### 2. Practical Examples
+* **Standard Admin:** `root ALL=(ALL:ALL) ALL`
+    * The `root` user can act as any user (e.g., `sudo -u bob`) and any group (e.g., `sudo -g staff`).
+* **Specific User Only:** `sarah ALL=(bob) ALL`
+    * `sarah` can run commands as `bob`, but she cannot run commands as `root`.
+    * Command: `sudo -u bob ls /home/bob`
+* **Group Escalation:** `operator ALL=(:backup) /usr/bin/rsync`
+    * The `operator` user can run `rsync`, but they must assume the `backup` group identity to access restricted files.
+    * Command: `sudo -g backup rsync ...`
+
+---
+
+##### 3. Default Behavior Summary
+If you see an entry like `%admin ALL=(ALL) ALL`, it means:
+1.  **Who:** Any user in the `admin` group.
+2.  **Where:** On any host.
+3.  **Third Field (ALL):** Can act as any user. Because the `:Group` part is missing, it defaults to the target user's primary group.
+4.  **Command:** Can run any command.
+
+> **Note:** Even if a user has `(ALL:ALL)` permissions, they must still use the `-u` or `-g` flags in their command (e.g., `sudo -u username <command>`) if they want to act as someone other than the default **root** user.
 
 
+## Access Control Files
 
+- Most of the access control files are stored under the `**/etc/**` directory.  
+- **Any user** can read the dir, but only **root** user can write to it.  
+### 1. `/etc/passwd` file
+- also known as **password file**.
+- contains all users information like ` Username | UID | GID | Home dir | default shell `
+  <img width="830" height="146" alt="image" src="https://github.com/user-attachments/assets/6b150a30-a40c-45fd-9dea-0eeeaf27e9b0" />  
+- But passwords are not saved in this file, they are saved in `/etc/shadow` file.
+- Each line contains `USERNAME : PASSWORD : UID : GID : GECOS : HOMEDIR : SHELL`
+   * **USERNAME**: The name used to log in (e.g., `bob`).
+   * **PASSWORD**: Usually an `x`, meaning the password is stored in `/etc/shadow`.
+   * **UID**: Unique User ID number.
+   * **GID**: Primary Group ID number.
+   * **GECOS**: User comments/Full name field. It is the general information of the user. ` fullname, location, phone number etc`. This is optional and can be blank.
+   * **HOMEDIR**: The path to the user's home folder.
+   * **SHELL**: The default terminal shell for the user (e.g., `/bin/bash` or `/bin/sh`).
 
+### 2. `/etc/shadow` file
+- passwords are stored here
+- content in this file is hashed.
+  <img width="820" height="242" alt="image" src="https://github.com/user-attachments/assets/2f8c510b-c66b-46b8-aa3e-661c3bdd322e" />
+- Each line contains the following information:
+  `USERNAME:PASSWORD:LASTCHANGE:MINAGE:MAXAGE:WARN:INACTIVE:EXPDATE:RESERVED`
+  * **USERNAME (bob)**: Matches the entry in `/etc/passwd`.
+  * **PASSWORD ($6$0h0u...)**: The hashed password. The `$6$` indicates it was encrypted using SHA-512.
+  * **LASTCHANGE (18188)**: The date the password was last changed (measured in days since Jan 1, 1970).
+  * **MINAGE (0)**: Minimum days required between password changes (0 means anytime).
+  * **MAXAGE (99999)**: Maximum days the password is valid (99999 effectively means it never expires).
+  * **WARN (7)**: Number of days before expiration that the user starts getting warning messages.
+  * **INACTIVE**: Days after a password expires before the account is locked (blank if not set).
+  * **EXPDATE**: A fixed date when the account will be disabled, represented in days since the Epoch (blank if not set).
+  * **RESERVED**: A field reserved for future use.
+### 3. `/etc/group` file
+- This file stores basic information about the **groups** on the system.
+- This file is sometimes simply referred to as the "group file".
+- Details: ` NAME : PASSWORD : GID : MEMBERS `.
+  * **NAME** (`developer`): The first field is the name of the group.
+  * **PASSWORD** (`x`): This field is the group password, which is normally set to **x**.
+      * *Note:* The **x** indicates that the group password is saved in a shadow file, the same as the user password file.
+  * **GID** (`1001`): This field represents the numerical **Group ID (GID)** of the group.
+  * **MEMBERS** (`bob,sara`): The last field contains the members of the group, which can be a comma-separated list of usernames.
+  <img width="1190" height="103" alt="image" src="https://github.com/user-attachments/assets/0c587405-2227-4fd1-a5a6-55eba4263c94" />
 
+## User Management
+- Commands used to manage users. Need to run these commands as `root` user
+- **To add a new user**
+  ```
+  useradd <user_name>
+  ```
+  ```
+  useradd bob
+  ```
+  It will set the home dir to default `/home/<username>` and default shell `/bin/sh`
+- To check the details of the user 'bob'.
+  ```
+  grep -i bob /etc/passwd
+  ```
+- To check password of user
+  ```
+  grep -i bob /etc/shadow
+  ```
+- To set the password for the user.
+  ```
+  passwd <username>
+  ```
+**Users can login and check their details**.
+- To check username
+  ```
+  whoami
+  ```
+- To set passwd
+  ```
+  passwd
+  ```
+  provide current password and the new password.
+  <img width="1222" height="437" alt="image" src="https://github.com/user-attachments/assets/fb827632-fcf6-47a2-a0c1-a137f03bfe80" />
+
+- **Useradd** command with options:
+  ```
+  useradd -u 1009 -g 1009 -d /home/robert/ -s /bin/bash -c "Mercury project member" bob
+  ```
+  * **-c**: Custome comments.
+  * **-d**: home directory path.
+  * **-e**: account expiry date.
+  * **-u**: to specify custome UID.
+  * **-g**: to specify custome GID.
+  * **-G**: to create user with multiple secondary groups.
+  <img width="1135" height="277" alt="image" src="https://github.com/user-attachments/assets/b4c592bf-c8c1-47a0-80f2-cb950395b8fd" />
+
+- **To delete a user**
+  ```
+  userdel <user_name>
+  ```
+  ```
+  userdel bob
+  ```
+- **To add a group**
+  ```
+  groupadd -g <GID> <Group_name> 
+  ```
+  ```
+  groupadd -g 1011 developer 
+  ```
+- **To delete a group**
+  ```
+  groupdel <Group_name>
+  ```
+  ```
+  groupdel developer
+  ```
 
