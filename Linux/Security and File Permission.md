@@ -10,20 +10,20 @@ Security in linux is a very vast topic and involvs many topics.
 - **Network Security**: To restrict or allow access to services listening on the server. Normally we rely on external firewalls. It can also be setup in system using tools like IPTables and Firewalld.
 - **SSH Hardneing**: **Secure Shell** used for remote access. SSH Hardening makes sure only authorized user have access to system.
 - **SELinux**: Uses security policies for isolating applications running on the same system from each other. 
-
+---
 > ### User Accounts:
 Every user in linux associates with an account. User account maintains <username, passwordm, UID> to login into the system.  
 UID - UserID which is unique to each user.  
 User account information stored in **`/etc/passwd`** file  
 <img width="1405" height="773" alt="image" src="https://github.com/user-attachments/assets/caa9beec-1a6d-4e4e-9fef-620195d550ca" /></br>
-
+---
 > ### Groups:
 Group is a collection of user. Used to organize users based on common attributes such as role or a function.  
 Group information stored in **`/etc/group`** file.  
 Each group has unique identifier which is GID (Group ID)  
 Suppose we have two developers bob and michael, who has similar role, we can group them in a "Developer" gorup. So we can provide similar access for them to files and folders in the system.  
 <img width="507" height="85" alt="image" src="https://github.com/user-attachments/assets/0df0f986-23e9-4b37-860f-d0f813e88ce8" /></br>
-
+---
 > ### User Account Details:
 Every user account contains details like
 - **Username**
@@ -51,7 +51,7 @@ We can get these details by below command
   grep -i <username> /etc/passwd
   ```
   <img width="898" height="76" alt="image" src="https://github.com/user-attachments/assets/ea8183a6-23c5-4f1f-bd17-e83d11e03fd9" />
-
+---
 > ### Account Types
 
 1. **User account**:
@@ -72,7 +72,7 @@ We can get these details by below command
    - Created when services are installed in linux.
    - For **example**, an **nginx service** makes use of a service account called **nginx**.
      <img width="1102" height="513" alt="image" src="https://github.com/user-attachments/assets/a680aae3-f25d-4b2a-b1e7-700cc0e744e7" />
-
+---
 > ### COMMANDS
 - To see the information about user. This command give information like UID, GID.
   ```
@@ -87,7 +87,7 @@ We can get these details by below command
   last
   ```
   <img width="1133" height="387" alt="image" src="https://github.com/user-attachments/assets/e2fa554d-7be7-4821-ad70-daa670582139" />
-
+---
 > ### Switching Users
 To swith to any user type command ` su - ` and enter password.
 ```
@@ -151,8 +151,6 @@ The field is split into two parts by a colon: `(User : Group)`
 | **(root)** | User is restricted to impersonating **only the root user**. |
 | **(:developers)** | User stays as themselves but gains the permissions of the **developers group**. |
 
----
-
 ##### 2. Practical Examples
 * **Standard Admin:** `root ALL=(ALL:ALL) ALL`
     * The `root` user can act as any user (e.g., `sudo -u bob`) and any group (e.g., `sudo -g staff`).
@@ -163,8 +161,6 @@ The field is split into two parts by a colon: `(User : Group)`
     * The `operator` user can run `rsync`, but they must assume the `backup` group identity to access restricted files.
     * Command: `sudo -g backup rsync ...`
 
----
-
 ##### 3. Default Behavior Summary
 If you see an entry like `%admin ALL=(ALL) ALL`, it means:
 1.  **Who:** Any user in the `admin` group.
@@ -174,7 +170,7 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
 
 > **Note:** Even if a user has `(ALL:ALL)` permissions, they must still use the `-u` or `-g` flags in their command (e.g., `sudo -u username <command>`) if they want to act as someone other than the default **root** user.
 
-
+---
 ## Access Control Files
 
 - Most of the access control files are stored under the `**/etc/**` directory.  
@@ -192,7 +188,7 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
    * **GECOS**: User comments/Full name field. It is the general information of the user. ` fullname, location, phone number etc`. This is optional and can be blank.
    * **HOMEDIR**: The path to the user's home folder.
    * **SHELL**: The default terminal shell for the user (e.g., `/bin/bash` or `/bin/sh`).
-
+---
 ### 2. `/etc/shadow` file
 - passwords are stored here
 - content in this file is hashed.
@@ -208,6 +204,7 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
   * **INACTIVE**: Days after a password expires before the account is locked (blank if not set).
   * **EXPDATE**: A fixed date when the account will be disabled, represented in days since the Epoch (blank if not set).
   * **RESERVED**: A field reserved for future use.
+---
 ### 3. `/etc/group` file
 - This file stores basic information about the **groups** on the system.
 - This file is sometimes simply referred to as the "group file".
@@ -218,7 +215,7 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
   * **GID** (`1001`): This field represents the numerical **Group ID (GID)** of the group.
   * **MEMBERS** (`bob,sara`): The last field contains the members of the group, which can be a comma-separated list of usernames.
   <img width="1190" height="103" alt="image" src="https://github.com/user-attachments/assets/0c587405-2227-4fd1-a5a6-55eba4263c94" />
-
+---
 ## User Management
 - Commands used to manage users. Need to run these commands as `root` user
 - **To add a new user**
@@ -286,4 +283,118 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
   ```
   groupdel developer
   ```
+---
+## File Permission and Ownership
+### File permissions
+* `**ls**` command
+* gives etails of the files.
+* using flag `-l`, gives all files details in list format.
+* Result: `**-rwxrw-r--** 1 ravikiran 197121     151 Aug 18  2021  BullseyeCoverageError.txt`
+* **""-""** : First place is "Identifier" decide file type.
+   | Identifier | File Type |
+   | :---: | :--- |
+   | **-** | Regular File |
+   | **d** | Directory |
+   | **l** | Symbolic Link |
+   | **c** | Character Device File |
+   | **b** | Block Device File |
+   | **p** | Named Pipe (FIFO) |
+   | **s** | Socket |
+* **rwxrw-r--**: This is to specify file permissions.
+   * File permissions: `r: read`  `w: write`   `x: execute`
+   * **rwx**: first three letters are permissions of the owner. Denoted by letter `**u**`.
+   * **rw-**: next three letters are permissions of the group. Denoted by letter `**g**`.
+   * **r--**: nex three letters are permissions of the all other users. Denoted by letter `**0**`.
+* **Example:**
+   * A file permission is like this `r-xrwxr--`
+   * Owner: `Bob`, Group: `Devs`, `Bob` is also part of the group.
+   * Here `owner(bob)` has the : Read ✔️, Write ❌, Execute ✔️
+   * `Group(devs)` has : Read ✔️, Write ✔️, Execute ✔️
+   * Even though `Bob` is in the `devs group`, he won't have write access.
+   * Because linux check access orderwise:  `owner ➜ group access ➜ all other`
+   * So as per the rule, it checks the owner access, and then it stops.
+### Octal Values:
+* Octal values of the permissions:
+    |Bit|Permission|Octal Value|
+    | :---: | :--- | :--- |
+    |r|read|4|
+    |w|write|2|
+    |x|execute|1|
+    |-|No permission|0|
+* To get the required combination of permissions, we have to add the Octal values of the permissions.
+     |Combination|Octal Value|Sum|
+     | :---: | :--- | :--- |
+     |rwx|4+2+1|7|
+     |rw-|4+2+0|6|
+     |-wx|0+2+1|3|
+     |r-x|4+0+1|5|
+### Modifying File Permissions:
+* To modify file permission:
+  ```
+  chmod <permission> <file_name>
+  ```
+* Permissions can be modified in two ways.
+  * Symbolic
+  * Numeric
+* **Symbolic**:
+     | Command  ➜➜➜➜➜  Desired Permission |
+     | :--- |
+     |`chmod u+rwx file.txt`  ➜➜➜➜➜  Provides full access to owner|
+     |`chmod ugo+r-x file.txt`  ➜➜➜➜➜  Provides read access to owner, group, and others, removes execute access|
+     |`chmod o-rwx file.txt`  ➜➜➜➜➜  Remove all access for others|
+     |`chmod u+rwx,g+r-x,o-rwx file.txt`  ➜➜➜➜➜  Full access for Owner, add read for group, remove all for others.|
+* **Numeric**: To user numeric method, use the combination of octal values shown above to achieve permission.
+     | Command  ➜➜➜➜➜  Desired Permission |
+     | :--- |
+     |`chmod 777 file.txt`  ➜➜➜➜➜  Provides full access to Owner, Group, Others |
+     |`chmod 555 file.txt`  ➜➜➜➜➜  Provides Read, Execute to Owner, Group, Others |
+     |`chmod 660 file.txt`  ➜➜➜➜➜  Provide Read and Write to Owner, Group. No access to Others|
+     |`chmod 750 file.txt`  ➜➜➜➜➜  Provide Read, Write, Execute to Owner. Read and Write to Group. No access to Others.|
 
+### Modifying File Ownership:
+* To specify the owner and group of the file.
+  ```
+  chown <owner>:<group> <file_name>
+  ```
+     | Command  ➜➜➜➜➜  Desired Ownership |
+     | :--- |
+     |`chown bob:developer file.txt`  ➜➜➜➜➜  Changes owner to bob, group to develooper |
+     |`chown bob file.txt`  ➜➜➜➜➜  Changes owner to bob. Group unchanged(**when not provided**) |
+* To modify only a group of the file.
+  ```
+  chgrp android test.file
+  ```
+  Only changes the group of the file to 'android'.
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
