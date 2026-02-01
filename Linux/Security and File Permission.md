@@ -367,18 +367,72 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
   Only changes the group of the file to 'android'.
   
 
+## SSH and SCP
 
+### SSH
+* To login into remote computer and execute commands.
+* Connect to remote computer by Hostname or IP address
+  ```
+  ssh <IP_address or Hostname>
+  ```
+* Connect to remoe computer with a user.
+  ```
+  ssh <user>@</user><IP_address or Hostname>
+  ```
+  OR
+  ```
+  ssh -l <user> </user><IP_address or Hostname>
+  ```
+* **Requirements**:
+  * For **SSH** to work, ssh service should be running on the remote server on **Port 22**.
+  * Require a valid user credentials fro the remote server OR SSH key to login.
 
+* **Example**:  
+  Let'say you want to connect to a `devapp01` server from current server. Use below command
+  ```
+  ssh devapp01
+  ```
+  As we have not specified any user, it will try to login as current user and ask for the current user password of the same user on remote server.
+  ![alt text](Images/Security and File Permission/image.png)
 
+#### Password-Less SSH
+* We need to generate a key pair on the client.
+* Key Pair : `Private Key` + `Public Key`
+  * **Private Key**: Shared with client(user or you) only, not with anyone else.
+  * **Public Key**: Shared with others inlcuding remote server.
+  * As public key alImages/Security and File Permission/ready installed in remtote server, you can unlock it using private key while logging throug SSH.
+* **Steps for SSH using Key-pair**:
+  * Create the key pair on the client. On our laptop.
+    ```
+    ssh-keygen -t rsa
+    ```
+  * **Public Key** is stored in the location: `/home/bob/.ssh/id_rsa.pub` [ .ssh dir inside the client Home dir]
+  * **Private Key** is stored in the location: `/home/bob/.ssh/id_rsa` [ .ssh dir inside the client Home dir]
+  * Next you have to copy the Public key to the remoe server, so we have to login using password atleast once.
+    ![alt text](image-1.png)
+  * You can use command to login and copy the public key
+    ```
+    ssh-copy-id <user>@<host_name>
+    ```
+    Enter the password, when asked
+    ![alt text](Images/Security and File Permission/image-2.png)
+  * Public key will be saved in the remote server in the following path: `/home/bob/.ssh/authorized_keys`
 
-
-
-
-
-
-
-
-
+### SCP
+* **SCP** allows you to copy data b/w systems over **SSH**
+* To copy file from our system to a remote server
+  ```
+  scp <Source_path> <Hostname>:<Destination_path>
+  ```
+  **Ex:**
+  ```
+  scp /home/bob/caleston-code.tar.z devapp01:/home/bob
+  ```
+  > Caution: You should have write permission in destination directory of the server, else the scp command will fail as **Permission Denied**.
+* To copy direcotries instead of files use flag `-pr` with `scp`
+  ```
+  scp -pr /home/bob/media devapp01:/home/bob  
+  ```
 
 
 
