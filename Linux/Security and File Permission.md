@@ -393,7 +393,7 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
   ssh devapp01
   ```
   As we have not specified any user, it will try to login as current user and ask for the current user password of the same user on remote server.
-  ![alt text](Images/Security and File Permission/image.png)
+  ![Alt text](Images/SecurityandFilePermission/image.png)
 
 #### Password-Less SSH
 * We need to generate a key pair on the client.
@@ -409,13 +409,13 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
   * **Public Key** is stored in the location: `/home/bob/.ssh/id_rsa.pub` [ .ssh dir inside the client Home dir]
   * **Private Key** is stored in the location: `/home/bob/.ssh/id_rsa` [ .ssh dir inside the client Home dir]
   * Next you have to copy the Public key to the remoe server, so we have to login using password atleast once.
-    ![alt text](image-1.png)
+    ![Alt text](Images/SecurityandFilePermission/image-1.png)
   * You can use command to login and copy the public key
     ```
     ssh-copy-id <user>@<host_name>
     ```
     Enter the password, when asked
-    ![alt text](Images/Security and File Permission/image-2.png)
+    ![Alt text](Images/SecurityandFilePermission/image-2.png)
   * Public key will be saved in the remote server in the following path: `/home/bob/.ssh/authorized_keys`
 
 ### SCP
@@ -435,9 +435,27 @@ If you see an entry like `%admin ALL=(ALL) ALL`, it means:
   ```
 
 
+## Network Security  
+![Alt text](Images/SecurityandFilePermission/image-3.png)
+* In real life scenario, we will have many clients accessing many servers.
+* We have to allow a range IP's or network to have connection.
+* We can apply such secruty using external firewalls:
+    * Cisco ASA
+    * Juniper NGFW
+    * Barracuda NGFW
+    * Fortinet
+* Rules can be applied through these appliances to control traffic through network.
+* We can also achieve this using tool at induvidual server level like
+    * For Linux: **IPTables, FirewallD**
+    * For Windows: **Firewalls**
 
-
-
+### IP TABLES:
+#### Scenario
+  | System/server | Hostname  | IP address |
+  |:--- | :--- | :--- |
+  |Client|localhost|172.16.238.187|
+  |Application Server|DEVAPP01|172.16.238.10|
+  |DB Server|DEVDB01|172.16.238.11|
 
 
 
